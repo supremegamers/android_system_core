@@ -36,6 +36,7 @@ write_raw_image(const char *dst, const char *src, loff_t offset, int test)
     int dst_fd = -1;
     int src_fd = -1;
     uint8_t buffer[2048];
+    ssize_t buf_offset;
     ssize_t nr_bytes;
     ssize_t tmp;
     int done = 0;
@@ -80,8 +81,9 @@ write_raw_image(const char *dst, const char *src, loff_t offset, int test)
         if (test)
             nr_bytes = 0;
 
+        buf_offset = 0;
         while (nr_bytes > 0) {
-            if ((tmp = write(dst_fd, buffer, nr_bytes)) < 0) {
+            if ((tmp = write(dst_fd, &buffer[buf_offset], nr_bytes)) < 0) {
                 /* XXX: Should we not even bother with EINTR? */
                 if (errno == EINTR)
                     continue;
@@ -91,6 +93,7 @@ write_raw_image(const char *dst, const char *src, loff_t offset, int test)
             if (!tmp)
                 continue;
             nr_bytes -= tmp;
+            buf_offset += tmp;
         }
     }
 

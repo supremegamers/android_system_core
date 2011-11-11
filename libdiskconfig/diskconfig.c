@@ -74,7 +74,7 @@ parse_len(const char *str, uint64_t *plen)
         }
     } else {
         /* convert len to kilobytes */
-        if (multiple > 1024)
+        if (multiple >= 1024)
             multiple >>= 10;
         *plen *= multiple;
 

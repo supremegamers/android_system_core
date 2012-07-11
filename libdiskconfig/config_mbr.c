@@ -259,11 +259,11 @@ config_mbr(struct disk_info *dinfo)
         }
 
         /* if extended, need 1 lba for ebr */
-        if ((cur_lba + extended) >= dinfo->num_lba)
+        if (dinfo->num_lba && (cur_lba + extended) >= dinfo->num_lba)
             goto nospace;
         else if (pinfo->len_kb != (uint32_t)-1) {
             uint32_t sz_lba = (pinfo->len_kb / dinfo->sect_size) * 1024;
-            if ((cur_lba + sz_lba + extended) > dinfo->num_lba)
+            if (dinfo->num_lba && (cur_lba + sz_lba + extended) > dinfo->num_lba)
                 goto nospace;
         }
 

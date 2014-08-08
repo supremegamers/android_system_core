@@ -103,7 +103,7 @@ static inline void utf32_codepoint_to_utf8(uint8_t* dstP, char32_t srcChar, size
 
 static inline int32_t utf32_at_internal(const char* cur, size_t *num_read)
 {
-    const char first_char = *cur;
+    const unsigned char first_char = *cur;
     if ((first_char & 0x80) == 0) { // ASCII
         *num_read = 1;
         return *cur;

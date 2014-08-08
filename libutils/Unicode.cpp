@@ -135,7 +135,7 @@ size_t strnlen32(const char32_t *s, size_t maxlen)
 
 static inline int32_t utf32_at_internal(const char* cur, size_t *num_read)
 {
-    const char first_char = *cur;
+    const unsigned char first_char = *cur;
     if ((first_char & 0x80) == 0) { // ASCII
         *num_read = 1;
         return *cur;
@@ -364,7 +364,7 @@ ssize_t utf8_length(const char *src)
     const char *cur = src;
     size_t ret = 0;
     while (*cur != '\0') {
-        const char first_char = *cur++;
+        const unsigned char first_char = *cur++;
         if ((first_char & 0x80) == 0) { // ASCII
             ret += 1;
             continue;

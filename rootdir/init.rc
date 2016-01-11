@@ -64,6 +64,8 @@ on early-init
     # Mount bootstrap linker configuration as current
     mount none /linkerconfig/bootstrap /linkerconfig bind rec
 
+    mount debugfs /sys/kernel/debug /sys/kernel/debug mode=755
+
     start ueventd
 
     # Run apexd-bootstrap so that APEXes that provide critical libraries

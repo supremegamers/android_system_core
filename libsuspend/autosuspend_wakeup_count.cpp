@@ -31,22 +31,26 @@
 #include <android-base/file.h>
 #include <android-base/logging.h>
 #include <android-base/strings.h>
+#include <android-base/properties.h>
 
 #include "autosuspend_ops.h"
 
 #define BASE_SLEEP_TIME 100000
 #define MAX_SLEEP_TIME 60000000
 
+static constexpr char default_sleep_state[] = "mem";
+static constexpr char fallback_sleep_state[] = "freeze";
+
 static int state_fd = -1;
 static int wakeup_count_fd;
 
+using android::base::GetProperty;
 using android::base::ReadFdToString;
 using android::base::Trim;
 using android::base::WriteStringToFd;
 
 static pthread_t suspend_thread;
 static sem_t suspend_lockout;
-static constexpr char sleep_state[] = "mem";
 static void (*wakeup_func)(bool success) = NULL;
 static int sleep_time = BASE_SLEEP_TIME;
 static constexpr char sys_power_state[] = "/sys/power/state";
@@ -60,6 +64,35 @@ static void update_sleep_time(bool success) {
     }
     // double sleep time after each failure up to one minute
     sleep_time = MIN(sleep_time * 2, MAX_SLEEP_TIME);
+}
+
+static bool sleep_state_available(const char *state)
+{
+    std::string buf;
+    if (state_fd < 0 || !ReadFdToString(state_fd, &buf)) {
+        PLOG(ERROR) << "Error reading from " << sys_power_state;
+        return false;
+    }
+    return buf.find(state) != std::string::npos;
+}
+
+static const std::string &get_sleep_state()
+{
+    static std::string sleep_state;
+
+    if (sleep_state.empty()) {
+        sleep_state = GetProperty("sleep.state", "");
+        if (!sleep_state.empty()) {
+            LOG(INFO) << "autosuspend using sleep.state property (" << sleep_state << ")";
+        } else if (sleep_state_available(default_sleep_state)) {
+            sleep_state = default_sleep_state;
+            LOG(INFO) << "autosuspend using default sleep_state (" << sleep_state << ")";
+        } else {
+            sleep_state = fallback_sleep_state;
+            LOG(WARNING) << "autosuspend '" << default_sleep_state << "' unavailable, using fallback state (" << sleep_state << ")";
+        }
+    }
+    return sleep_state;
 }
 
 static void* suspend_thread_func(void* arg __attribute__((unused))) {
@@ -91,6 +124,7 @@ static void* suspend_thread_func(void* arg __attribute__((unused))) {
         }
 
         LOG(VERBOSE) << "write " << wakeup_count << " to wakeup_count";
+        auto sleep_state = get_sleep_state();
         if (WriteStringToFd(wakeup_count, wakeup_count_fd)) {
             LOG(VERBOSE) << "write " << sleep_state << " to " << sys_power_state;
             success = WriteStringToFd(sleep_state, state_fd);
@@ -213,7 +247,7 @@ static int force_suspend(int timeout_ms) {
         return ret;
     }
 
-    return WriteStringToFd(sleep_state, state_fd) ? 0 : -1;
+    return WriteStringToFd(get_sleep_state(), state_fd) ? 0 : -1;
 }
 
 static void autosuspend_set_wakeup_callback(void (*func)(bool success)) {

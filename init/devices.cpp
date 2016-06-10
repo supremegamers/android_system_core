@@ -481,7 +481,7 @@ void DeviceHandler::HandleUevent(const Uevent& uevent) {
                    std::find(subsystems_.cbegin(), subsystems_.cend(), uevent.subsystem);
                subsystem != subsystems_.cend()) {
         devpath = subsystem->ParseDevPath(uevent);
-    } else if (uevent.subsystem == "usb") {
+    } else if (uevent.subsystem == "usb" || uevent.subsystem == "usbmisc") {
         if (!uevent.device_name.empty()) {
             devpath = "/dev/" + uevent.device_name;
         } else {

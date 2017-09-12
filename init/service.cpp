@@ -88,6 +88,12 @@ static Result<std::string> ComputeContextFromExecutable(const std::string& servi
         free(new_con);
     }
     if (rc == 0 && computed_context == mycon.get()) {
+#if defined(__ANDROID__)
+        LOG(WARNING) << "File " << service_path << "(labeled \"" << filecon.get()
+                     << "\") has incorrect label or no domain transition from " << mycon.get()
+                     << " to another SELinux domain defined.";
+        return "skip";
+#else
         std::string error = StringPrintf(
                 "File %s (labeled \"%s\") has incorrect label or no domain transition from %s to "
                 "another SELinux domain defined. Have you configured your "
@@ -98,6 +104,7 @@ static Result<std::string> ComputeContextFromExecutable(const std::string& servi
             return Error() << error;
         }
         LOG(ERROR) << error;
+#endif
     }
     if (rc < 0) {
         return Error() << "Could not get process context";

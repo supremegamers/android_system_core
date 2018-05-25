@@ -103,7 +103,7 @@ static int DropPrivs(bool klogd, bool auditd) {
         }
     }
     if (cap_set_proc(caps.get()) < 0) {
-        android::prdebug("failed to set CAP_SYSLOG or CAP_AUDIT_CONTROL (%d)", errno);
+        android::prdebug("failed to set CAP_SYSLOG or CAP_AUDIT_CONTROL (%s)", strerror(errno));
         return -1;
     }
 

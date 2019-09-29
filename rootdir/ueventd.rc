@@ -1,4 +1,5 @@
 firmware_directories /system/lib/firmware
+modalias_handling enabled
 uevent_socket_rcvbuf_size 16M
 
 subsystem graphics

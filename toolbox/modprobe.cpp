@@ -138,9 +138,7 @@ extern "C" int modprobe_main(int argc, char** argv) {
         }
     }
     if (mod_dirs.empty()) {
-        std::cerr << "No module configuration directories given." << std::endl;
-        print_usage();
-        return EXIT_FAILURE;
+        mod_dirs.emplace_back("/system/lib/modules");
     }
     if (parameter_count && modules.size() > 1) {
         std::cerr << "Only one module may be loaded when specifying module parameters."

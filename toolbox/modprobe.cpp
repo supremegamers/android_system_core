@@ -205,9 +205,7 @@ extern "C" int modprobe_main(int argc, char** argv) {
         }
     }
     if (mod_dirs.empty()) {
-        LOG(ERROR) << "No module configuration directories given.";
-        print_usage();
-        return EXIT_FAILURE;
+        mod_dirs.emplace_back("/system/lib/modules", "/vendor/lib/modules");
     }
     if (parameter_count && modules.size() > 1) {
         LOG(ERROR) << "Only one module may be loaded when specifying module parameters.";

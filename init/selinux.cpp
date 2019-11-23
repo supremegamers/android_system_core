@@ -92,11 +92,11 @@ namespace {
 enum EnforcingStatus { SELINUX_PERMISSIVE, SELINUX_ENFORCING };
 
 EnforcingStatus StatusFromCmdline() {
-    EnforcingStatus status = SELINUX_ENFORCING;
+    EnforcingStatus status = SELINUX_PERMISSIVE;
 
     ImportKernelCmdline([&](const std::string& key, const std::string& value) {
-        if (key == "androidboot.selinux" && value == "permissive") {
-            status = SELINUX_PERMISSIVE;
+        if (key == "androidboot.selinux" && value == "enforcing") {
+            status = SELINUX_ENFORCING;
         }
     });
 

@@ -95,13 +95,13 @@ enum EnforcingStatus { SELINUX_PERMISSIVE, SELINUX_ENFORCING };
 
 EnforcingStatus StatusFromProperty() {
     std::string value;
-    if (android::fs_mgr::GetKernelCmdline("androidboot.selinux", &value) && value == "permissive") {
-        return SELINUX_PERMISSIVE;
+    if (android::fs_mgr::GetKernelCmdline("androidboot.selinux", &value) && value == "enforcing") {
+        return SELINUX_ENFORCING;
     }
-    if (android::fs_mgr::GetBootconfig("androidboot.selinux", &value) && value == "permissive") {
-        return SELINUX_PERMISSIVE;
+    if (android::fs_mgr::GetBootconfig("androidboot.selinux", &value) && value == "enforcing") {
+        return SELINUX_ENFORCING;
     }
-    return SELINUX_ENFORCING;
+    return SELINUX_PERMISSIVE;
 }
 
 bool IsEnforcing() {

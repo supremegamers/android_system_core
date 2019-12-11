@@ -144,6 +144,7 @@ libcutils_nonwindows_sources = [
     "fs.cpp",
     "hashmap.cpp",
     "multiuser.cpp",
+    "probe_module.c",
     "str_parms.cpp",
 ]
 

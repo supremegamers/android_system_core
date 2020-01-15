@@ -974,22 +974,7 @@ static void property_derive_build_fingerprint() {
     return;
   }
 
-  const std::string UNKNOWN = "unknown";
-  build_fingerprint = GetProperty("ro.product.brand", UNKNOWN);
-  build_fingerprint += '/';
-  build_fingerprint += GetProperty("ro.product.name", UNKNOWN);
-  build_fingerprint += '/';
-  build_fingerprint += GetProperty("ro.product.device", UNKNOWN);
-  build_fingerprint += ':';
-  build_fingerprint += GetProperty("ro.build.version.release", UNKNOWN);
-  build_fingerprint += '/';
-  build_fingerprint += GetProperty("ro.build.id", UNKNOWN);
-  build_fingerprint += '/';
-  build_fingerprint += GetProperty("ro.build.version.incremental", UNKNOWN);
-  build_fingerprint += ':';
-  build_fingerprint += GetProperty("ro.build.type", UNKNOWN);
-  build_fingerprint += '/';
-  build_fingerprint += GetProperty("ro.build.tags", UNKNOWN);
+    build_fingerprint = GetProperty("ro.vendor.build.fingerprint", "");
 
   LOG(INFO) << "Setting property 'ro.build.fingerprint' to '"
             << build_fingerprint << "'";

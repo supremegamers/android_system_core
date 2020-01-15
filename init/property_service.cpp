@@ -890,28 +890,8 @@ static void property_initialize_build_id() {
     }
 }
 
-static std::string ConstructBuildFingerprint(bool legacy) {
-    const std::string UNKNOWN = "unknown";
-    std::string build_fingerprint = GetProperty("ro.product.brand", UNKNOWN);
-    build_fingerprint += '/';
-    build_fingerprint += GetProperty("ro.product.name", UNKNOWN);
-    build_fingerprint += '/';
-    build_fingerprint += GetProperty("ro.product.device", UNKNOWN);
-    build_fingerprint += ':';
-    build_fingerprint += GetProperty("ro.build.version.release_or_codename", UNKNOWN);
-    build_fingerprint += '/';
-
-    std::string build_id =
-            legacy ? GetProperty(LEGACY_ID_PROP, UNKNOWN) : GetProperty(ID_PROP, UNKNOWN);
-    build_fingerprint += build_id;
-    build_fingerprint += '/';
-    build_fingerprint += GetProperty("ro.build.version.incremental", UNKNOWN);
-    build_fingerprint += ':';
-    build_fingerprint += GetProperty("ro.build.type", UNKNOWN);
-    build_fingerprint += '/';
-    build_fingerprint += GetProperty("ro.build.tags", UNKNOWN);
-
-    return build_fingerprint;
+static std::string ConstructBuildFingerprint(bool /* legacy */) {
+    return GetProperty("ro.vendor.build.fingerprint", "");
 }
 
 // Derive the legacy build fingerprint if we overwrite the build id at runtime.

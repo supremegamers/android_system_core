@@ -831,20 +831,29 @@ static const char *snet_prop_key[] = {"ro.boot.vbmeta.device_state",
                                       "ro.build.keys",
                                       "ro.build.tags",
                                       "ro.system.build.tags",
+                                      "ro.vendor.boot.warranty_bit",
+                                      "ro.vendor.warranty_bit",
+                                      "vendor.boot.vbmeta.device_state",
+                                      "vendor.boot.verifiedbootstate",
                                       NULL};
 
-static const char *snet_prop_value[] = {"locked", // ro.boot.vbmeta.device_state
-                                        "green",  // ro.boot.verifiedbootstate
-                                        "1",      // ro.boot.flash.locked
-                                        "enforcing",    // ro.boot.selinux
-                                        "enforcing",    // ro.boot.veritymode
-                                        "0",            // ro.boot.warranty_bit
-                                        "0",            // ro.warranty_bit
-                                        "user",         // ro.build.type
-                                        "release-keys", // ro.build.keys
-                                        "release-keys", // ro.build.tags
-                                        "release-keys", // ro.system.build.tags
-                                        NULL};
+static const char *snet_prop_value[] = {
+    "locked",       // ro.boot.vbmeta.device_state
+    "green",        // ro.boot.verifiedbootstate
+    "1",            // ro.boot.flash.locked
+    "enforcing",    // ro.boot.selinux
+    "enforcing",    // ro.boot.veritymode
+    "0",            // ro.boot.warranty_bit
+    "0",            // ro.warranty_bit
+    "user",         // ro.build.type
+    "release-keys", // ro.build.keys
+    "release-keys", // ro.build.tags
+    "release-keys", // ro.system.build.tags
+    "0",            // ro.vendor.boot.warranty_bit
+    "0",            // ro.vendor.warranty_bit
+    "locked",       // vendor.boot.vbmeta.device_state
+    "green",        // vendor.boot.verifiedbootstate
+    NULL};
 
 static void workaround_snet_properties() {
   std::string error;

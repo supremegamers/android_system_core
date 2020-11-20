@@ -859,12 +859,15 @@ static void workaround_snet_properties() {
   // Weaken property override security to set safetynet props
   weaken_prop_override_security = true;
 
+  std::string build_type = android::base::GetProperty("ro.build.type", "");
   std::string error;
   LOG(INFO) << "snet: Hiding sensitive props";
 
   // Hide all sensitive props
-  for (int i = 0; snet_prop_key[i]; ++i) {
-    PropertySet(snet_prop_key[i], snet_prop_value[i], &error);
+  if (build_type != "eng") {
+    for (int i = 0; snet_prop_key[i]; ++i) {
+      PropertySet(snet_prop_key[i], snet_prop_value[i], &error);
+    }
   }
 
   // Restore the normal property override security after safetynet props have

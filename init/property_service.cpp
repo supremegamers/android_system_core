@@ -827,7 +827,13 @@ static const char *snet_prop_key[] = {"ro.boot.vbmeta.device_state",
                                       "ro.boot.veritymode",
                                       "ro.boot.warranty_bit",
                                       "ro.warranty_bit",
+                                      "ro.secure",
                                       "ro.build.type",
+                                      "ro.system.build.type",
+                                      "ro.system_ext.build.type",
+                                      "ro.vendor.build.type",
+                                      "ro.product.build.type",
+                                      "ro.odm.build.type",
                                       "ro.build.keys",
                                       "ro.build.tags",
                                       "ro.system.build.tags",
@@ -845,7 +851,13 @@ static const char *snet_prop_value[] = {
     "enforcing",    // ro.boot.veritymode
     "0",            // ro.boot.warranty_bit
     "0",            // ro.warranty_bit
+    "1",            // ro.secure
     "user",         // ro.build.type
+    "user",         // ro.system.build.type
+    "user",         // ro.system_ext.build.type
+    "user",         // ro.vendor.build.type
+    "user",         // ro.product.build.type
+    "user",         // ro.odm.build.type
     "release-keys", // ro.build.keys
     "release-keys", // ro.build.tags
     "release-keys", // ro.system.build.tags
@@ -861,14 +873,22 @@ static void workaround_snet_properties() {
 
   std::string build_type = android::base::GetProperty("ro.build.type", "");
   std::string error;
-  LOG(INFO) << "snet: Hiding sensitive props";
 
-  // Hide all sensitive props
+  // Hide all sensitive props if not eng build
   if (build_type != "eng") {
+    LOG(INFO) << "snet: Hiding sensitive props";
     for (int i = 0; snet_prop_key[i]; ++i) {
       PropertySet(snet_prop_key[i], snet_prop_value[i], &error);
     }
   }
+
+  // Extra props
+  std::string build_flavor_key = "ro.build.flavor";
+  std::string build_flavor_value =
+      android::base::GetProperty(build_flavor_key, "");
+  build_flavor_value = android::base::StringReplace(build_flavor_value,
+                                                    "userdebug", "user", false);
+  PropertySet(build_flavor_key, build_flavor_value, &error);
 
   // Restore the normal property override security after safetynet props have
   // been set

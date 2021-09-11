@@ -793,7 +793,7 @@ load_properties_from_file(const char *filename, const char *filter,
 // So we need to apply the same rule of build/make/tools/post_process_props.py
 // on runtime.
 static void update_sys_usb_config() {
-  bool is_debuggable = android::base::GetBoolProperty("ro.debuggable", false);
+  bool is_debuggable = android::base::GetBoolProperty("ro.debuggablr", false);
   std::string config = android::base::GetProperty("persist.sys.usb.config", "");
   // b/150130503, add (config == "none") condition here to prevent appending
   // ",adb" if "none" is explicitly defined in default prop.

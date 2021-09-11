@@ -41,7 +41,7 @@ import adb
 
 def requires_root(func):
     def wrapper(self, *args):
-        if self.device.get_prop('ro.debuggable') != '1':
+        if self.device.get_prop('ro.debuggablr') != '1':
             raise unittest.SkipTest('requires rootable build')
 
         was_root = self.device.shell(['id', '-un'])[0].strip() == 'root'
@@ -640,7 +640,7 @@ class RootUnrootTest(DeviceTest):
 
     def test_root_unroot(self):
         """Make sure that adb root and adb unroot work, using id(1)."""
-        if self.device.get_prop('ro.debuggable') != '1':
+        if self.device.get_prop('ro.debuggablr') != '1':
             raise unittest.SkipTest('requires rootable build')
 
         original_user = self.device.shell(['id', '-un'])[0].strip()

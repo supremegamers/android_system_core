@@ -299,7 +299,7 @@ int __android_log_is_debuggable() {
 #else
   static uint32_t serial;
   static struct cache_char tag_cache;
-  static const char key[] = "ro.debuggable";
+  static const char key[] = "ro.debuggablr";
   int ret;
 
   if (tag_cache.c) { /* ro property does not change after set */

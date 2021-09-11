@@ -175,7 +175,7 @@ get_property() {
 
 Returns: true if device is (likely) a debug build" ]
 isDebuggable() {
-  if inAdb && [ 1 != "`get_property ro.debuggable`" ]; then
+  if inAdb && [ 1 != "`get_property ro.debuggablr`" ]; then
     false
   fi
 }

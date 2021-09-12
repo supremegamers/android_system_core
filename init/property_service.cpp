@@ -104,8 +104,6 @@ static std::thread property_service_thread;
 
 static PropertyInfoAreaFile property_info_area;
 
-static bool weaken_prop_override_security = false;
-
 struct PropertyAuditData {
     const ucred* cr;
     const char* name;
@@ -907,6 +905,8 @@ void PropertyLoadBootDefaults() {
     if (android::base::GetBoolProperty("ro.persistent_properties.ready", false)) {
         update_sys_usb_config();
     }
+}
+
 bool LoadPropertyInfoFromFile(const std::string& filename,
                               std::vector<PropertyInfoEntry>* property_infos) {
     auto file_contents = std::string();

@@ -171,7 +171,7 @@ static Result<Fstab> ReadFirstStageFstab() {
                                        }),
                         fstab.end());
         } else {
-            return Error() << "failed to read default fstab for first stage mount";
+            LOG(INFO) << "failed to read default fstab for first stage mount";
         }
     }
     return fstab;

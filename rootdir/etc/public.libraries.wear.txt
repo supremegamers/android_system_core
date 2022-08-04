@@ -26,3 +26,4 @@ libstdc++.so
 libsync.so
 libvulkan.so
 libz.so
+libttscompat.so nopreload

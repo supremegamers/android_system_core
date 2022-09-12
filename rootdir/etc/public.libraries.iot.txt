@@ -28,4 +28,3 @@ libsync.so
 libvulkan.so
 libwebviewchromium_plat_support.so
 libz.so
-libttscompat.so nopreload

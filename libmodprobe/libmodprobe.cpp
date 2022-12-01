@@ -358,6 +358,7 @@ Modprobe::Modprobe(const std::vector<std::string>& base_paths, const std::string
         auto options_callback = std::bind(&Modprobe::ParseOptionsCallback, this, _1);
         ParseCfg(release_base_path + "/modules.options", options_callback);
         ParseCfg(base_path + "/modules.options", options_callback);
+        ParseCfg("/system/etc/modules.options", options_callback);
 
         auto blocklist_callback = std::bind(&Modprobe::ParseBlocklistCallback, this, _1);
         ParseCfg(release_base_path + "/modules.blocklist", blocklist_callback);

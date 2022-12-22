@@ -805,9 +805,9 @@ static void property_initialize_ro_product_props() {
             "brand", "device", "manufacturer", "model", "name",
     };
     const char* RO_PRODUCT_PROPS_ALLOWED_SOURCES[] = {
-            "odm", "product", "system_ext", "system", "vendor",
+            "bliss", "odm", "product", "system_ext", "system", "vendor",
     };
-    const char* RO_PRODUCT_PROPS_DEFAULT_SOURCE_ORDER = "product,odm,vendor,system_ext,system";
+    const char* RO_PRODUCT_PROPS_DEFAULT_SOURCE_ORDER = "bliss,product,odm,vendor,system_ext,system";
     const std::string EMPTY = "";
 
     std::string ro_product_props_source_order =

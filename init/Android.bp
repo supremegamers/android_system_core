@@ -343,11 +343,7 @@ soong_config_module_type {
 // Otherwise, it will overwrite the symlink.
 init_first_stage_cc_defaults {
     name: "init_first_stage_defaults",
-    soong_config_variables: {
-        BOARD_USES_RECOVERY_AS_BOOT: {
-            installable: false,
-        },
-    },
+    installable: false,
 
     stem: "init",
 

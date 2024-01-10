@@ -21,14 +21,6 @@ import /system/etc/init/hw/init.${ro.zygote}.rc
 
 # Cgroups are mounted right before early-init using list from /etc/cgroups.json
 on early-init
-    # Unpleasant hack to disable USB data without needing a dedicated script or binary.
-    # There is no way to immediately trigger something in another file apart from using a service.
-    # All the logic is in onrestart commands. Service is defined in device-specific init files.
-    # Harmless warning in log/dmesg if service is not defined.
-    start disable_usb_data
-    restart disable_usb_data
-    stop disable_usb_data
-
     # Disable sysrq from keyboard
     write /proc/sys/kernel/sysrq 0
 

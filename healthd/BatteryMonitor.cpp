@@ -28,6 +28,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <cmath>
 #include <memory>
 #include <optional>
 
@@ -135,6 +136,9 @@ BatteryMonitor::BatteryMonitor()
       mBatteryDevicePresent(false),
       mBatteryFixedCapacity(0),
       mBatteryFixedTemperature(0),
+      mBatteryFullEnergy(0),
+      mBatteryEnergyCounter(0),
+      mBatteryFullEnergyDesignCapacity(0),
       mHealthInfo(std::make_unique<HealthInfo>()) {
     initHealthInfo(mHealthInfo.get());
 }
@@ -316,14 +320,17 @@ void BatteryMonitor::updateValues(void) {
         mHealthInfo->batteryCurrentMicroamps = getIntField(mHealthdConfig->batteryCurrentNowPath);
 
     if (!mHealthdConfig->batteryFullChargePath.isEmpty())
-        mHealthInfo->batteryFullChargeUah = getIntField(mHealthdConfig->batteryFullChargePath);
+        mHealthInfo->batteryFullChargeUah = mBatteryFullEnergy
+                                                    ? mBatteryFullEnergy
+                                                    : getIntField(mHealthdConfig->batteryFullChargePath);
 
     if (!mHealthdConfig->batteryCycleCountPath.isEmpty())
         mHealthInfo->batteryCycleCount = getIntField(mHealthdConfig->batteryCycleCountPath);
 
     if (!mHealthdConfig->batteryChargeCounterPath.isEmpty())
-        mHealthInfo->batteryChargeCounterUah =
-                getIntField(mHealthdConfig->batteryChargeCounterPath);
+        mHealthInfo->batteryChargeCounterUah = mBatteryEnergyCounter
+                                                    ? mBatteryEnergyCounter
+                                                    : getIntField(mHealthdConfig->batteryChargeCounterPath);
 
     if (!mHealthdConfig->batteryCurrentAvgPath.isEmpty())
         mHealthInfo->batteryCurrentAverageMicroamps =
@@ -333,9 +340,15 @@ void BatteryMonitor::updateValues(void) {
         mHealthInfo->batteryChargeTimeToFullNowSeconds =
                 getIntField(mHealthdConfig->batteryChargeTimeToFullNowPath);
 
-    if (!mHealthdConfig->batteryFullChargeDesignCapacityUahPath.isEmpty())
-        mHealthInfo->batteryFullChargeDesignCapacityUah =
-                getIntField(mHealthdConfig->batteryFullChargeDesignCapacityUahPath);
+    if (!mHealthdConfig->batteryFullChargeDesignCapacityUahPath.isEmpty()) {
+        mHealthInfo->batteryFullChargeDesignCapacityUah = mBatteryFullEnergyDesignCapacity
+                                                            ? mBatteryFullEnergyDesignCapacity
+                                                            : getIntField(mHealthdConfig->batteryFullChargeDesignCapacityUahPath);
+        std::string s = std::to_string((mHealthInfo->batteryFullChargeDesignCapacityUah) / 1000);
+        if (!(property_get_int32("ro.health.battery_capacity", 0) == 
+        (mHealthInfo->batteryFullChargeDesignCapacityUah / 1000))) {
+            property_set("ro.health.battery_capacity", s.c_str());}
+}
 
     mHealthInfo->batteryTemperatureTenthsCelsius =
             mBatteryFixedTemperature ? mBatteryFixedTemperature
@@ -532,8 +545,9 @@ status_t BatteryMonitor::getProperty(int id, struct BatteryProperty *val) {
     switch(id) {
     case BATTERY_PROP_CHARGE_COUNTER:
         if (!mHealthdConfig->batteryChargeCounterPath.isEmpty()) {
-            val->valueInt64 =
-                getIntField(mHealthdConfig->batteryChargeCounterPath);
+            val->valueInt64 = mBatteryEnergyCounter
+                                    ? mBatteryEnergyCounter
+                                    : getIntField(mHealthdConfig->batteryChargeCounterPath);
             ret = OK;
         } else {
             ret = NAME_NOT_FOUND;
@@ -621,7 +635,9 @@ void BatteryMonitor::dumpState(int fd) {
     }
 
     if (!mHealthdConfig->batteryChargeCounterPath.isEmpty()) {
-        v = getIntField(mHealthdConfig->batteryChargeCounterPath);
+        v =  mBatteryEnergyCounter
+                ? mBatteryEnergyCounter
+                : getIntField(mHealthdConfig->batteryChargeCounterPath);
         snprintf(vs, sizeof(vs), "charge counter: %d\n", v);
         write(fd, vs, strlen(vs));
     }
@@ -644,6 +660,10 @@ void BatteryMonitor::dumpState(int fd) {
 
 void BatteryMonitor::init(struct healthd_config *hc) {
     String8 path;
+    String8 path_vol_min;
+    float vol_min;
+    int path_wh;
+    float temp;
     char pval[PROPERTY_VALUE_MAX];
 
     mHealthdConfig = hc;
@@ -686,6 +706,13 @@ void BatteryMonitor::init(struct healthd_config *hc) {
                 // the battery supplying the power to the whole system.
                 if (isScopedPowerSupply(name)) continue;
                 mBatteryDevicePresent = true;
+
+                // Get voltage_min_design if exist
+                path_vol_min.clear();
+                path_vol_min.appendFormat("%s/%s/voltage_min_design", POWER_SUPPLY_SYSFS_PATH,
+                                    name);
+                if (access(path_vol_min, R_OK) == 0)
+                    vol_min = getIntField(path_vol_min) / MILLION;
 
                 if (mHealthdConfig->batteryStatusPath.isEmpty()) {
                     path.clear();
@@ -732,8 +759,18 @@ void BatteryMonitor::init(struct healthd_config *hc) {
                     path.clear();
                     path.appendFormat("%s/%s/charge_full",
                                       POWER_SUPPLY_SYSFS_PATH, name);
-                    if (access(path, R_OK) == 0)
+                    if (access(path, R_OK) == 0) {
                         mHealthdConfig->batteryFullChargePath = path;
+                    } else {
+                        path.clear();
+                        path.appendFormat("%s/%s/energy_full", POWER_SUPPLY_SYSFS_PATH, name);
+                        if (access(path, R_OK) == 0) {
+                            mHealthdConfig->batteryFullChargePath = path;
+                            temp = (getIntField(path) / 1000) / vol_min;
+                            path_wh = round(temp) * 1000;
+                            mBatteryFullEnergy = path_wh;
+                        }
+                    }
                 }
 
                 if (mHealthdConfig->batteryCurrentNowPath.isEmpty()) {
@@ -768,8 +805,18 @@ void BatteryMonitor::init(struct healthd_config *hc) {
                 if (mHealthdConfig->batteryFullChargeDesignCapacityUahPath.isEmpty()) {
                     path.clear();
                     path.appendFormat("%s/%s/charge_full_design", POWER_SUPPLY_SYSFS_PATH, name);
-                    if (access(path, R_OK) == 0)
+                    if (access(path, R_OK) == 0) {
                         mHealthdConfig->batteryFullChargeDesignCapacityUahPath = path;
+                    } else {
+                        path.clear();
+                        path.appendFormat("%s/%s/energy_full_design", POWER_SUPPLY_SYSFS_PATH, name);
+                        if (access(path, R_OK) == 0) {
+                            mHealthdConfig->batteryFullChargeDesignCapacityUahPath = path;
+                            temp = (getIntField(path) / 1000) / vol_min;
+                            path_wh = round(temp) * 1000;
+                            mBatteryFullEnergyDesignCapacity = path_wh;
+                        }
+                    }
                 }
 
                 if (mHealthdConfig->batteryCurrentAvgPath.isEmpty()) {
@@ -784,8 +831,18 @@ void BatteryMonitor::init(struct healthd_config *hc) {
                     path.clear();
                     path.appendFormat("%s/%s/charge_counter",
                                       POWER_SUPPLY_SYSFS_PATH, name);
-                    if (access(path, R_OK) == 0)
+                    if (access(path, R_OK) == 0) {
                         mHealthdConfig->batteryChargeCounterPath = path;
+                    } else {
+                        path.clear();
+                        path.appendFormat("%s/%s/energy_now", POWER_SUPPLY_SYSFS_PATH, name);
+                        if (access(path, R_OK) == 0) {
+                            mHealthdConfig->batteryChargeCounterPath = path;
+                            temp = (getIntField(path) / 1000) / vol_min;
+                            path_wh = round(temp) * 1000;
+                            mBatteryEnergyCounter = path_wh;
+                        }
+                    }
                 }
 
                 if (mHealthdConfig->batteryTemperaturePath.isEmpty()) {

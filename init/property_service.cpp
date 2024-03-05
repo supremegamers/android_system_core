@@ -1397,12 +1397,12 @@ static void SetSafetyNetProps() {
     // Check whether verified boot state is yellow
     auto isVerifiedBootYellow = false;
     // This runs before keys are set as props, so we need to process them ourselves.
-    ImportKernelCmdline([&](const std::string& key, const std::string& value) {
+    android::fs_mgr::ImportKernelCmdline([&](const std::string& key, const std::string& value) {
         if (key == ANDROIDBOOT_VERIFIEDBOOTSTATE && value == "yellow") {
             isVerifiedBootYellow = true;
         }
     });
-    ImportBootconfig([&](const std::string& key, const std::string& value) {
+    android::fs_mgr::ImportBootconfig([&](const std::string& key, const std::string& value) {
         if (key == ANDROIDBOOT_VERIFIEDBOOTSTATE && value == "yellow") {
             isVerifiedBootYellow = true;
         }

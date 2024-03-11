@@ -1185,6 +1185,9 @@ void CreateSerializedPropertyInfo() {
         LoadPropertyInfoFromFile("/product_property_contexts", &property_infos);
         LoadPropertyInfoFromFile("/odm_property_contexts", &property_infos);
         LoadPropertyInfoFromFile("/dev/selinux/apex_property_contexts", &property_infos);
+        if (access("/dev/selinux/apex_property_contexts", R_OK) != -1) {
+            LoadPropertyInfoFromFile("/dev/selinux/apex_property_contexts", &property_infos);
+        }
     }
 
     auto serialized_contexts = std::string();

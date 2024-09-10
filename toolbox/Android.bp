@@ -69,6 +69,7 @@ cc_binary {
     name: "toolbox",
     defaults: ["toolbox_binary_defaults"],
     recovery_available: true,
+    bootstrap: true,
 }
 
 cc_binary {
@@ -76,4 +77,5 @@ cc_binary {
     stem: "toolbox",
     vendor: true,
     defaults: ["toolbox_binary_defaults"],
+    bootstrap: true,
 }
